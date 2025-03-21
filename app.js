@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { App } = require("@slack/bolt");
 const { getItems } = require("./sheetApi.js");
-const { findItem } = require("./utils.js");
+const { findItem, formatResults } = require("./utils.js");
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -17,13 +17,11 @@ app.message(async ({ message, say }) => {
   const items = await getItems();
   const userMessage = message.text.toLowerCase();
 
-  const result = findItem(items, userMessage);
+  const results = findItem(items, userMessage);
 
-  if (result) {
-    await say(`📌  *${result.name}* is located: *${result.location}*.`);
-  } else {
-    await say(`I don't have information where is *${message.text}*`);
-  }
+  const response = formatResults(results, userMessage);
+
+  await say(response);
 });
 
 (async () => {
